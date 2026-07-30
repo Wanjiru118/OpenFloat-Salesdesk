@@ -31,3 +31,60 @@
     color:#64748B;
     font-size:14px;
 }
+
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+}
+
+.toolbar input{
+    flex:1;
+    padding:12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+}
+
+.table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+}
+
+.table th,
+.table td{
+    padding:15px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+}
+
+.table th{
+    background:#f8fafc;
+}
+
+.modal{
+    display:none;
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(0,0,0,.5);
+}
+
+.modal-content{
+
+    background:white;
+
+    width:400px;
+
+    margin:100px auto;
+
+    padding:20px;
+
+    border-radius:12px;
+}
