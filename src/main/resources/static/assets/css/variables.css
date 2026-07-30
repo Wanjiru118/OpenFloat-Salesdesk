@@ -1,0 +1,18 @@
+:root{
+    --navy:#0F172A;
+    --teal:#14B8A6;
+    --gold:#F59E0B;
+
+    --white:#FFFFFF;
+    --light:#F8FAFC;
+    --gray:#64748B;
+    --border:#E2E8F0;
+
+    --sidebar-width:260px;
+
+    --radius:12px;
+
+    --shadow:0 4px 12px rgba(0,0,0,.08);
+
+    --font-main:'DM Sans',sans-serif;
+}

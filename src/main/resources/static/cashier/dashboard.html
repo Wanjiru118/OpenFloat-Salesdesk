@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<title>Cashier Dashboard</title>
+
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div id="sidebar"></div>
+
+    <div class="main">
+
+        <div id="topbar"></div>
+
+        <div class="content">
+
+            <h1>Cashier Dashboard</h1>
+
+            <br>
+
+            <div class="grid">
+
+                <div class="card">
+                    Today's Sales
+                </div>
+
+                <div class="card">
+                    Recent Transactions
+                </div>
+
+                <div class="card">
+                    Pending Payments
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<script src="../assets/js/guard.js"></script>
+<script src="../assets/js/layout.js"></script>
+
+<script>
+
+requireAuth("cashier");
+
+document.getElementById("sidebar").innerHTML =
+createSidebar(
+    "cashier",
+    "dashboard"
+);
+
+document.getElementById("topbar").innerHTML =
+createTopbar("Cashier Dashboard");
+</script>
+
+</body>
+</html>

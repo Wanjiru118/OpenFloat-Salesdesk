@@ -1,0 +1,33 @@
+.card{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:var(--shadow);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.card{
+    transition:0.3s;
+    cursor:pointer;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.stat-number{
+    font-size:32px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.stat-label{
+    color:#64748B;
+    font-size:14px;
+}
