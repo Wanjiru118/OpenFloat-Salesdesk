@@ -116,7 +116,7 @@
 <script>
 
 requireAuth("admin");
-
+let editIndex = null;
 document.getElementById(
     "sidebar"
 ).innerHTML =
@@ -132,30 +132,36 @@ createTopbar(
 );
 
 
-const products = [
-
+let products =
+JSON.parse(
+    localStorage.getItem("products")
+) || [
     {
         name:"Sugar",
         category:"Groceries",
         price:150,
         stock:100
     },
-
     {
         name:"Bread",
         category:"Bakery",
         price:65,
         stock:40
     },
-
     {
         name:"Milk",
         category:"Dairy",
         price:75,
         stock:25
     }
-
 ];
+function saveProducts(){
+
+    localStorage.setItem(
+        "products",
+        JSON.stringify(products)
+    );
+}
 
 function renderProducts(){
 
@@ -237,10 +243,32 @@ function deleteProduct(index){
     }
 
     products.splice(index,1);
-
+saveProducts();
     renderProducts();
 }
 
+function editProduct(index){
+
+    editIndex = index;
+
+    document.getElementById(
+        "productName"
+    ).value =
+    products[index].name;
+
+    document.getElementById(
+        "productCategory"
+    ).value =
+    products[index].category;
+
+    document.getElementById(
+        "productPrice"
+    ).value =
+    products[index].price;
+
+    modal.style.display =
+    "block";
+}
 const modal =
 document.getElementById(
     "productModal"
@@ -261,7 +289,7 @@ document.getElementById(
     "click",
     ()=>{
 
-        products.push({
+        const product = {
 
             name:
             document.getElementById(
@@ -279,7 +307,21 @@ document.getElementById(
             ).value,
 
             stock:0
-        });
+        };
+
+        if(editIndex !== null){
+
+            products[editIndex] =
+            product;
+
+            editIndex = null;
+
+        } else {
+
+            products.push(product);
+        }
+
+        saveProducts();
 
         renderProducts();
 
@@ -287,6 +329,7 @@ document.getElementById(
         "none";
     }
 );
+      
 document.getElementById(
     "addProductBtn"
 ).addEventListener(

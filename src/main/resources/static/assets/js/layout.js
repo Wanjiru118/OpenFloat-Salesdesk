@@ -19,11 +19,16 @@ function createSidebar(role = "admin", active = "") {
             </li>
 
             <li>
-                <a href="#">
-                    Sales
-                </a>
+               <a href="../admin/products.html">
+    Products
+</a>
             </li>
-
+<li>
+    <a class="${active === 'stock' ? 'active' : ''}"
+       href="../admin/stock.html">
+       Stock
+    </a>
+</li>
             <li>
                 <a href="#">
                     Customers
