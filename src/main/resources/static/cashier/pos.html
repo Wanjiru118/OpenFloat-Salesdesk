@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<title>Point of Sale</title>
+
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div id="sidebar"></div>
+
+    <div class="main">
+
+        <div id="topbar"></div>
+
+        <div class="content">
+
+    <div class="pos-container">
+
+    <!-- PRODUCTS SECTION -->
+    <div class="pos-products">
+
+        <h2>Products</h2>
+
+        <input
+            type="text"
+            id="productSearch"
+            placeholder="Search products..."
+        >
+
+        <div
+            id="productList"
+            class="product-list">
+        </div>
+
+    </div>
+
+
+    <!-- CART SECTION -->
+    <div class="pos-cart">
+
+        <h2>Shopping Cart</h2>
+
+        <div id="cartItems">
+            <p>No items in cart.</p>
+        </div>
+
+        <div class="cart-summary">
+
+            <h3>
+                Total:
+                <span id="cartTotal">
+                    KES 0
+                </span>
+            </h3>
+
+            <button id="checkoutBtn">
+                Checkout
+            </button>
+            <div
+    id="checkoutModal"
+    class="modal"
+    style="display: none;"
+>
+
+    <div class="modal-content">
+
+        <h2>Checkout</h2>
+
+        <p>
+            Total:
+            <strong id="checkoutTotal">
+                KES 0
+            </strong>
+        </p>
+
+        <label>
+            Payment Method
+        </label>
+
+        <select id="paymentMethod">
+
+            <option value="cash">
+                Cash
+            </option>
+
+            <option value="mpesa">
+                M-Pesa
+            </option>
+
+            <option value="credit">
+                Credit
+            </option>
+
+        </select>
+
+        <div id="paymentDetails"></div>
+
+        <br>
+
+        <button id="completeSaleBtn">
+            Complete Sale
+        </button>
+
+        <button
+            type="button"
+            id="closeCheckoutBtn"
+        >
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+<script src="../assets/js/guard.js"></script>
+<script src="../assets/js/layout.js"></script>
+
+<script>
+
+requireAuth("cashier");
+
+document.getElementById("sidebar").innerHTML =
+createSidebar(
+    "cashier", "pos"
+);
+
+document.getElementById("topbar").innerHTML =
+createTopbar("Point of Sale");
+
+let products =
+    JSON.parse(
+        localStorage.getItem("products")
+    ) || [];
+
+let cart = [];
+
+let sales =
+    JSON.parse(
+        localStorage.getItem(
+            "sales"
+        )
+    ) || [];
+
+function renderProducts(){
+
+    const productList =
+        document.getElementById(
+            "productList"
+        );
+
+    productList.innerHTML = "";
+
+    products.forEach(
+        (product, index) => {
+
+            productList.innerHTML += `
+                <div class="product-item">
+
+                    <h3>
+                        ${product.name}
+                    </h3>
+
+                    <p>
+                        ${product.category}
+                    </p>
+
+                    <p>
+                        KES
+                        ${Number(
+                            product.price || 0
+                        ).toLocaleString()}
+                    </p>
+
+                    <p>
+                        Stock:
+                        ${product.stock || 0}
+                    </p>
+
+                    <button
+                        onclick="addToCart(${index})">
+                        Add to Cart
+                    </button>
+
+                </div>
+            `;
+        }
+    );
+}
+
+function addToCart(index) {
+
+    const product = products[index];
+
+    // Don't allow products with no stock
+    if (Number(product.stock) <= 0) {
+        alert("This product is out of stock.");
+        return;
+    }
+
+    // Check if product is already in cart
+    const existingItem =
+        cart.find(
+            item => item.index === index
+        );
+
+    if (existingItem) {
+
+        // Don't allow quantity above available stock
+        if (
+            existingItem.quantity >=
+            Number(product.stock)
+        ) {
+            alert("Not enough stock available.");
+            return;
+        }
+
+        existingItem.quantity++;
+
+    } else {
+
+        cart.push({
+            index: index,
+            name: product.name,
+            price: Number(product.price),
+            quantity: 1
+        });
+    }
+
+    renderCart();
+    function increaseQuantity(index) {
+
+    const item = cart[index];
+
+    const product =
+        products[item.index];
+
+    if (
+        item.quantity >=
+        Number(product.stock)
+    ) {
+
+        alert(
+            "Not enough stock available."
+        );
+
+        return;
+    }
+
+    item.quantity++;
+
+    renderCart();
+}
+function decreaseQuantity(index) {
+
+    if (
+        cart[index].quantity > 1
+    ) {
+
+        cart[index].quantity--;
+
+    } else {
+
+        cart.splice(index, 1);
+    }
+
+    renderCart();
+}
+function removeFromCart(index) {
+
+    cart.splice(index, 1);
+
+    renderCart();
+}
+}
+function renderCart() {
+
+    const cartItems =
+        document.getElementById(
+            "cartItems"
+        );
+
+    const cartTotal =
+        document.getElementById(
+            "cartTotal"
+        );
+
+    cartItems.innerHTML = "";
+
+    if (cart.length === 0) {
+
+        cartItems.innerHTML =
+            "<p>No items in cart.</p>";
+
+        cartTotal.innerText =
+            "KES 0";
+
+        return;
+    }
+
+    let total = 0;
+
+    cart.forEach(
+        (item, index) => {
+
+            const itemTotal =
+                item.price *
+                item.quantity;
+
+            total += itemTotal;
+
+            cartItems.innerHTML += `
+                <div class="cart-item">
+
+                    <div>
+
+                        <strong>
+                            ${item.name}
+                        </strong>
+
+                        <br>
+
+                        KES
+                        ${item.price.toLocaleString()}
+
+                        <div class="quantity-controls">
+
+                            <button
+                                onclick="decreaseQuantity(${index})">
+                                −
+                            </button>
+
+                            <span>
+                                ${item.quantity}
+                            </span>
+
+                            <button
+                                onclick="increaseQuantity(${index})">
+                                +
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            KES
+                            ${itemTotal.toLocaleString()}
+                        </strong>
+
+                        <br>
+
+                        <button
+                            onclick="removeFromCart(${index})">
+                            Remove
+                        </button>
+
+                    </div>
+
+                </div>
+            `;
+        }
+    );
+
+    cartTotal.innerText =
+        "KES " +
+        total.toLocaleString();
+}
+function increaseQuantity(index) {
+
+    const item = cart[index];
+
+    const product =
+        products[item.index];
+
+    if (
+        item.quantity >=
+        Number(product.stock)
+    ) {
+        alert(
+            "Not enough stock available."
+        );
+        return;
+    }
+
+    item.quantity++;
+
+    renderCart();
+}
+
+
+function decreaseQuantity(index) {
+
+    if (
+        cart[index].quantity > 1
+    ) {
+
+        cart[index].quantity--;
+
+    } else {
+
+        cart.splice(index, 1);
+    }
+
+    renderCart();
+}
+function removeFromCart(index) {
+
+    cart.splice(index, 1);
+
+    renderCart();
+}
+renderProducts();
+
+document.getElementById(
+    "checkoutBtn"
+).addEventListener(
+    "click",
+    function () {
+
+        if (cart.length === 0) {
+
+            alert(
+                "Your cart is empty."
+            );
+
+            return;
+        }
+
+        let total = 0;
+
+        cart.forEach(
+            item => {
+
+                total +=
+                    item.price *
+                    item.quantity;
+
+            }
+        );
+
+        document.getElementById(
+            "checkoutTotal"
+        ).innerText =
+            "KES " +
+            total.toLocaleString();
+
+        document.getElementById(
+            "checkoutModal"
+        ).style.display = "flex";
+document.getElementById(
+    "paymentMethod"
+).dispatchEvent(
+    new Event("change")
+);
+    }
+);
+document.getElementById(
+    "closeCheckoutBtn"
+).addEventListener(
+    "click",
+    function () {
+
+        document.getElementById(
+            "checkoutModal"
+        ).style.display = "none";
+
+    }
+);
+document.getElementById(
+    "paymentMethod"
+).addEventListener(
+    "change",
+    function () {
+
+        const method = this.value;
+
+        const paymentDetails =
+            document.getElementById(
+                "paymentDetails"
+            );
+
+        if (method === "cash") {
+
+            paymentDetails.innerHTML = `
+                <label>
+                    Amount Received
+                </label>
+
+                <input
+                    type="number"
+                    id="amountReceived"
+                    placeholder="Enter amount received"
+                    min="0"
+                >
+
+                <p>
+                    Change:
+                    <strong id="changeAmount">
+                        KES 0
+                    </strong>
+                </p>
+            `;
+
+            setupCashCalculation();
+
+        }
+
+        else if (method === "mpesa") {
+
+            paymentDetails.innerHTML = `
+                <label>
+                    Customer Phone Number
+                </label>
+
+                <input
+                    type="tel"
+                    id="mpesaPhone"
+                    placeholder="07XXXXXXXX"
+                >
+
+                <p>
+                    Payment Status:
+                    <strong id="mpesaStatus">
+                        Waiting for payment
+                    </strong>
+                </p>
+            `;
+
+        }
+
+        else if (method === "credit") {
+
+    paymentDetails.innerHTML = `
+        <label>
+            Customer Name
+        </label>
+
+        <input
+            type="text"
+            id="creditCustomer"
+            placeholder="Enter customer name"
+        >
+
+        <label>
+            Deposit Amount
+        </label>
+
+        <input
+            type="number"
+            id="creditDeposit"
+            placeholder="Enter deposit"
+            min="0"
+        >
+
+        <p>
+            Outstanding Balance:
+            <strong id="creditBalance">
+                KES 0
+            </strong>
+        </p>
+    `;
+
+    setupCreditCalculation();
+
+}
+
+    }
+);
+function setupCashCalculation() {
+
+    const amountReceived =
+        document.getElementById(
+            "amountReceived"
+        );
+
+    const changeAmount =
+        document.getElementById(
+            "changeAmount"
+        );
+
+    amountReceived.addEventListener(
+        "input",
+        function () {
+
+            let total = 0;
+
+            cart.forEach(
+                item => {
+
+                    total +=
+                        item.price *
+                        item.quantity;
+
+                }
+            );
+
+            const received =
+                Number(
+                    amountReceived.value
+                );
+
+            const change =
+                received - total;
+
+            if (received >= total) {
+
+                changeAmount.innerText =
+                    "KES " +
+                    change.toLocaleString();
+
+            } else {
+
+                changeAmount.innerText =
+                    "Insufficient amount";
+
+            }
+
+        }
+    );
+}
+function setupCreditCalculation() {
+
+    const depositInput =
+        document.getElementById(
+            "creditDeposit"
+        );
+
+    const balanceDisplay =
+        document.getElementById(
+            "creditBalance"
+        );
+
+    depositInput.addEventListener(
+        "input",
+        function () {
+
+            let total = 0;
+
+            cart.forEach(
+                item => {
+
+                    total +=
+                        item.price *
+                        item.quantity;
+
+                }
+            );
+
+            const deposit =
+                Number(
+                    depositInput.value
+                ) || 0;
+
+            const balance =
+                total - deposit;
+
+            balanceDisplay.innerText =
+                "KES " +
+                Math.max(
+                    balance,
+                    0
+                ).toLocaleString();
+
+        }
+    );
+
+}
+function completeSale() {
+
+    if (cart.length === 0) {
+
+        alert(
+            "Cart is empty."
+        );
+
+        return;
+    }
+
+    let total = 0;
+
+    cart.forEach(
+        item => {
+
+            total +=
+                item.price *
+                item.quantity;
+
+        }
+    );
+
+    const paymentMethod =
+        document.getElementById(
+            "paymentMethod"
+        ).value;
+
+    const sale = {
+
+        id:
+            Date.now(),
+
+        date:
+            new Date()
+            .toLocaleString(),
+
+        paymentMethod,
+
+        total,
+
+        items:
+            [...cart]
+
+    };
+
+    sales.push(
+        sale
+    );
+
+    localStorage.setItem(
+        "sales",
+        JSON.stringify(
+            sales
+        )
+    );
+
+    cart.forEach(
+        item => {
+
+            products[
+                item.index
+            ].stock -=
+                item.quantity;
+
+        }
+    );
+
+    localStorage.setItem(
+        "products",
+        JSON.stringify(
+            products
+        )
+    );
+
+    cart = [];
+
+    renderCart();
+
+    renderProducts();
+
+    document.getElementById(
+        "checkoutModal"
+    ).style.display =
+        "none";
+
+    alert(
+        "Sale completed successfully."
+    );
+
+}
+document.getElementById(
+    "completeSaleBtn"
+).addEventListener(
+    "click",
+    completeSale
+);
+
+</script>
+
+</body>
+</html>

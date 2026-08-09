@@ -1,103 +1,94 @@
 function createSidebar(role = "admin", active = "") {
 
-    let menu = "";
+let menu = "";
 
-    if(role === "admin") {
+if(role === "admin") {
 
-        menu = `
-            <li>
-                <a class="${active === 'dashboard' ? 'active' : ''}"
-                   href="../admin/dashboard.html">
-                   Dashboard
-                </a>
-            </li>
+    menu = `
+        <li>
+            <a class="${active === 'dashboard' ? 'active' : ''}"
+               href="../admin/dashboard.html">
+               Dashboard
+            </a>
+        </li>
 
-            <li>
-                <a href="#">
-                    Products
-                </a>
-            </li>
+        <li>
+            <a href="#">
+                Products
+            </a>
+        </li>
 
-            <li>
-               <a href="../admin/products.html">
-    Products
-</a>
-            </li>
-<li>
-    <a class="${active === 'stock' ? 'active' : ''}"
-       href="../admin/stock.html">
-       Stock
+        <li>
+           <a href="../admin/products.html">
+Products
+
+        <li>
+            <a href="#">
+                Reports
+            </a>
+        </li>
+    `;
+
+} else {
+
+    menu = `
+        <li>
+            <a class="${active === 'dashboard' ? 'active' : ''}"
+               href="../cashier/dashboard.html">
+               Dashboard
+            </a>
+        </li>
+
+      <li>
+    <a class="${active === 'pos' ? 'active' : ''}"
+       href="../cashier/pos.html">
+       POS
     </a>
 </li>
-            <li>
-                <a href="#">
-                    Customers
-                </a>
-            </li>
 
-            <li>
-                <a href="#">
-                    Reports
-                </a>
-            </li>
-        `;
+<li>
+    <a class="${active === 'sales' ? 'active' : ''}"
+       href="../cashier/sales.html">
+       My Sales
+    </a>
+</li>
 
-    } else {
+        <li>
+            <a href="#">
+                Customers
+            </a>
+        </li>
+    `;
+}
 
-        menu = `
-            <li>
-                <a class="${active === 'dashboard' ? 'active' : ''}"
-                   href="../cashier/dashboard.html">
-                   Dashboard
-                </a>
-            </li>
+return `
+    <div class="sidebar">
 
-            <li>
-                <a href="#">
-                    POS
-                </a>
-            </li>
+        <div class="logo">
+            <h2>SalesDesk</h2>
+        </div>
 
-            <li>
-                <a href="#">
-                    My Sales
-                </a>
-            </li>
+        <ul class="menu">
+            ${menu}
+        </ul>
 
-            <li>
-                <a href="#">
-                    Customers
-                </a>
-            </li>
-        `;
-    }
+        <div class="profile">
 
-    return `
-        <div class="sidebar">
+            <p>
+                Role:
+                ${role.toUpperCase()}
+            </p>
 
-            <div class="logo">
-                <h2>SalesDesk</h2>
-            </div>
-
-            <ul class="menu">
-                ${menu}
-            </ul>
-
-            <div class="profile">
-
-                <p>
-                    Role:
-                    ${role.toUpperCase()}
-                </p>
-
-                <button onclick="logout()">
-                    Logout
-                </button>
-
-            </div>
+            <button onclick="logout()">
+                Logout
+            </button>
 
         </div>
-    `;
+
+    </div>
+`;
+
+
 }
 
 function createTopbar(title = "Dashboard") {
@@ -107,27 +98,25 @@ function createTopbar(title = "Dashboard") {
 
             <h3>${title}</h3>
 
-            <span>
-                POS System
-            </span>
-
         </div>
     `;
 }
 
 function logout(){
 
-    const confirmLogout =
-    confirm(
-        "Are you sure you want to logout?"
-    );
+const confirmLogout =
+confirm(
+    "Are you sure you want to logout?"
+);
 
-    if(!confirmLogout){
-        return;
-    }
+if(!confirmLogout){
+    return;
+}
 
-    localStorage.clear();
+localStorage.clear();
 
-    window.location.href =
-    "../auth/login.html";
+window.location.href =
+"../auth/login.html";
+
+
 }

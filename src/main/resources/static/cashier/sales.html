@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<title>Sales History</title>
+
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+
+</head>
+
+<body>
+
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+
+        <div id="topbar"></div>
+
+        <div class="content sales-content">
+
+            <h2>Sales History</h2>
+
+            <table id="salesTable">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Date</th>
+
+                        <th>Payment</th>
+
+                        <th>Total</th>
+
+                        <th>Items</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="salesTableBody">
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <script src="../assets/js/guard.js"></script>
+    <script src="../assets/js/layout.js"></script>
+
+    <script>
+
+        requireAuth("cashier");
+
+        document.getElementById("sidebar").innerHTML =
+            createSidebar("cashier", "sales");
+
+        document.getElementById("topbar").innerHTML =
+            createTopbar("Sales History");
+
+        const sales =
+            JSON.parse(
+                localStorage.getItem(
+                    "sales"
+                )
+            ) || [];
+
+        function renderSales() {
+
+            const tbody =
+                document.getElementById(
+                    "salesTableBody"
+                );
+
+            tbody.innerHTML = "";
+
+            if (sales.length === 0) {
+
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            No sales found.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            sales.forEach(
+                sale => {
+
+                    const itemCount =
+                        sale.items.length;
+
+                    tbody.innerHTML += `
+                        <tr>
+
+                            <td>
+                                ${sale.date}
+                            </td>
+
+                            <td>
+                                ${sale.paymentMethod}
+                            </td>
+
+                            <td>
+                                KES ${sale.total.toLocaleString()}
+                            </td>
+
+                            <td>
+                                ${itemCount}
+                            </td>
+
+                        </tr>
+                    `;
+                }
+            );
+        }
+
+        renderSales();
+
+    </script>
+
+</body>
+</html>
