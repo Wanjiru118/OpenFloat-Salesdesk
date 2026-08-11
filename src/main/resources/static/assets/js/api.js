@@ -39,7 +39,7 @@ const api = {
         );
     },
 
-    headers(){
+       headers(){
 
         return {
 
@@ -55,7 +55,8 @@ const api = {
         };
     },
 
-    async handleResponse(
+
+async handleResponse(
         response
     ){
 
@@ -68,4 +69,6 @@ const api = {
 
         return await response.json();
     }
+
+
 };

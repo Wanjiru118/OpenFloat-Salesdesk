@@ -384,50 +384,7 @@ function renderCart() {
         "KES " +
         total.toLocaleString();
 }
-function increaseQuantity(index) {
 
-    const item = cart[index];
-
-    const product =
-        products[item.index];
-
-    if (
-        item.quantity >=
-        Number(product.stock)
-    ) {
-        alert(
-            "Not enough stock available."
-        );
-        return;
-    }
-
-    item.quantity++;
-
-    renderCart();
-}
-
-
-function decreaseQuantity(index) {
-
-    if (
-        cart[index].quantity > 1
-    ) {
-
-        cart[index].quantity--;
-
-    } else {
-
-        cart.splice(index, 1);
-    }
-
-    renderCart();
-}
-function removeFromCart(index) {
-
-    cart.splice(index, 1);
-
-    renderCart();
-}
 renderProducts();
 
 document.getElementById(
@@ -711,7 +668,28 @@ function completeSale() {
         document.getElementById(
             "paymentMethod"
         ).value;
+        // REDUCE STOCK
+cart.forEach(item => {
 
+    const product =
+        products.find(
+            p => p.name === item.name
+        );
+
+    if(product){
+
+        product.stock -=
+            item.quantity;
+
+    }
+
+});
+
+localStorage.setItem(
+    "products",
+    JSON.stringify(products)
+);
+//CREATE SALE
     const sale = {
 
         id:
@@ -743,24 +721,7 @@ function completeSale() {
     console.log("SALE SAVED");
 console.log(localStorage.getItem("sales"));
 
-    cart.forEach(
-        item => {
-
-            products[
-                item.index
-            ].stock -=
-                item.quantity;
-
-        }
-    );
-
-    localStorage.setItem(
-        "products",
-        JSON.stringify(
-            products
-        )
-    );
-
+ 
     cart = [];
 
     renderCart();
