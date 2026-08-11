@@ -113,7 +113,7 @@ if(!confirmLogout){
     return;
 }
 
-localStorage.clear();
+localStorage.removeItem("userRole");
 
 window.location.href =
 "../auth/login.html";

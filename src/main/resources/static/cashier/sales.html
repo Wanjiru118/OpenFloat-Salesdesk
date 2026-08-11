@@ -23,6 +23,11 @@
         <div class="content sales-content">
 
             <h2>Sales History</h2>
+            <input
+    type="text"
+    id="salesSearch"
+    placeholder="Search sales..."
+>
 
             <table id="salesTable">
 
@@ -61,10 +66,14 @@
         <div id="saleDetailsContent">
 
         </div>
+<button id="printReceiptBtn">
+    Print Receipt
+</button>
 
-        <button id="closeDetailsBtn">
-            Close
-        </button>
+<button id="closeDetailsBtn">
+    Close
+</button>
+        
 
     </div>
 
@@ -78,6 +87,7 @@
     <script src="../assets/js/layout.js"></script>
 
     <script>
+        
 
         requireAuth("cashier");
 
@@ -93,8 +103,9 @@
                     "sales"
                 )
             ) || [];
+        let selectedSale = null;
 
-        function renderSales() {
+        function renderSales(searchTerm = "") {
 
             const tbody =
                 document.getElementById(
@@ -102,23 +113,45 @@
                 );
 
             tbody.innerHTML = "";
+            const filteredSales =
+    sales.filter(
+        sale => {
 
-            if (sales.length === 0) {
+            const text = `
+                ${sale.date}
+                ${sale.paymentMethod}
+                ${sale.total}
+            `.toLowerCase();
 
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="4">
-                            No sales found.
-                        </td>
-                    </tr>
-                `;
+            return text.includes(
+                searchTerm.toLowerCase()
+            );
 
-                return;
-            }
+        }
+    );
+    console.log("Sales:", sales);
+    console.log("Filtered:", filteredSales);
+    
+if (filteredSales.length === 0) {
 
-            sales.forEach(
-                sale => {
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="5">
+                No sales found.
+            </td>
+        </tr>
+    `;
 
+    return;
+
+}
+           
+        
+
+         filteredSales.forEach(
+    sale => {
+
+        console.log("Rendering sale:", sale);
                     const itemCount =
                         sale.items.length;
 
@@ -153,10 +186,23 @@
                     `;
                 }
             );
-        }
-
+  
+            }
         renderSales();
-        function viewSale(id) {
+        document.getElementById(
+    "salesSearch"
+).addEventListener(
+    "input",
+    function () {
+
+        renderSales(
+            this.value
+        );
+
+    }
+);
+   
+       function viewSale(id) {
 
     const sale =
         sales.find(
@@ -167,8 +213,11 @@
         return;
     }
 
+    selectedSale = sale;
+    
+
     let html = `
-        <p>
+        <p> 
             <strong>Date:</strong>
             ${sale.date}
         </p>
@@ -187,7 +236,7 @@
             html += `
                 <p>
 
-                    ${item.name}
+                    ${item.name} 
 
                     x
 
@@ -236,9 +285,75 @@ document.getElementById(
         ).style.display =
             "none";
 
+
     }
 );
+document.getElementById(
+    "printReceiptBtn"
+).addEventListener(
+    "click",
+    function () {
 
+        if (!selectedSale) {
+            return;
+        }
+
+        let receipt = `
+SALESDESK POS
+--------------------------------
+
+Date: ${selectedSale.date}
+
+Payment: ${selectedSale.paymentMethod}
+
+--------------------------------
+`;
+
+        selectedSale.items.forEach(
+            item => {
+
+                receipt += `
+${item.name}
+x${item.quantity}
+= KES ${(
+    item.price *
+    item.quantity
+).toLocaleString()}
+`;
+            }
+        );
+
+        receipt += `
+
+--------------------------------
+
+TOTAL:
+KES ${selectedSale.total.toLocaleString()}
+`;
+
+        const printWindow =
+            window.open(
+                "",
+                "_blank"
+            );
+
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Receipt</title>
+            </head>
+            <body>
+                <pre>${receipt}</pre>
+            </body>
+            </html>
+        `);
+
+        printWindow.document.close();
+
+        printWindow.print();
+
+    }
+);
     </script>
 
 </body>
