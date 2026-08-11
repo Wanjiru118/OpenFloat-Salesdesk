@@ -291,16 +291,18 @@
 }
 
 .sidebar {
-    width: 300px;
+    width: 260px;
     position: fixed;
     left: 0;
     top: 0;
     height: 100vh;
 }
 
-.main-content {
-    margin-left: 300px;
-    min-height: 100vh;
+.main-content{
+    margin-left:260px;
+    min-height:100vh;
+    width:calc(100% - 300px);
+    
 }
 
 .content {
@@ -311,4 +313,29 @@
     padding: 20px;
     border-bottom: 1px solid #ddd;
     background: white;
+}
+
+.inventory-summary{
+    display:flex;
+    gap:20px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.summary-card{
+    flex:1;
+    padding:20px;
+    border-radius:10px;
+    background:#fff;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+    text-align:center;
+}
+
+.summary-card h3{
+    margin-bottom:10px;
+}
+
+.summary-card p{
+    font-size:28px;
+    font-weight:bold;
 }

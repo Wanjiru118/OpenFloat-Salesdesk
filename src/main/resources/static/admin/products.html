@@ -18,7 +18,7 @@
 
     <div id="sidebar"></div>
 
-    <div class="main">
+    <div class="main-content">
 
         <div id="topbar"></div>
 
@@ -43,7 +43,24 @@
 </div>
 
 <br>
+<div class="inventory-summary">
 
+    <div class="summary-card">
+        <h3>Total Products</h3>
+        <p id="totalProducts">0</p>
+    </div>
+
+    <div class="summary-card">
+        <h3>Low Stock</h3>
+        <p id="lowStockCount">0</p>
+    </div>
+
+    <div class="summary-card">
+        <h3>Out of Stock</h3>
+        <p id="outOfStockCount">0</p>
+    </div>
+
+</div>
 <table class="table">
 
     <thead>
@@ -171,9 +188,29 @@ function renderProducts(){
     );
 
     table.innerHTML = "";
+document.getElementById(
+    "totalProducts"
+).innerText = products.length;
+
+document.getElementById(
+    "lowStockCount"
+).innerText =
+    products.filter(
+        p =>
+            Number(p.stock) > 0 &&
+            Number(p.stock) <= 5
+    ).length;
+
+document.getElementById(
+    "outOfStockCount"
+).innerText =
+    products.filter(
+        p =>
+            Number(p.stock) === 0
+    ).length;
 
     products.forEach((product,index) => {
-
+console.log(product.name, product.stock);
         table.innerHTML += `
             <tr>
 
@@ -183,7 +220,16 @@ function renderProducts(){
 
                 <td>${product.price}</td>
 
-               <td>${product.stock}</td>
+                <td>
+    ${product.stock}
+    ${
+        Number(product.stock) === 0
+            ? "❌ Out of Stock"
+            : Number(product.stock) <= 5
+            ? "⚠️ Low Stock"
+            : ""
+    }
+</td>
 
 <td>
     <button onclick="editProduct(${index})">

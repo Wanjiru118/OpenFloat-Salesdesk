@@ -25,10 +25,10 @@ body{
     bottom:0;
 }
 
-.main{
+.main-content{
     flex:1;
     margin-left:260px;
-}
+}s
 
 .topbar{
     height:70px;
@@ -44,6 +44,7 @@ body{
 
 .content{
     padding:25px;
+
 }
 
 .logo{
@@ -93,3 +94,9 @@ body{
     color:white;
     font-weight:bold;
 }
+.main-content{
+    flex:1;
+    margin-left:260px;
+    
+}
+
