@@ -38,6 +38,7 @@
 
                         <th>Items</th>
 
+                        <th>Details</th>
                     </tr>
 
                 </thead>
@@ -47,6 +48,27 @@
                 </tbody>
 
             </table>
+            <div
+    id="saleDetailsModal"
+    class="modal"
+    style="display:none;"
+>
+
+    <div class="modal-content">
+
+        <h2>Sale Details</h2>
+
+        <div id="saleDetailsContent">
+
+        </div>
+
+        <button id="closeDetailsBtn">
+            Close
+        </button>
+
+    </div>
+
+</div>
 
         </div>
 
@@ -116,8 +138,16 @@
                             </td>
 
                             <td>
-                                ${itemCount}
-                            </td>
+    ${itemCount}
+</td>
+
+<td>
+    <button
+        onclick="viewSale(${sale.id})"
+    >
+        View
+    </button>
+</td>
 
                         </tr>
                     `;
@@ -126,6 +156,88 @@
         }
 
         renderSales();
+        function viewSale(id) {
+
+    const sale =
+        sales.find(
+            s => s.id === id
+        );
+
+    if (!sale) {
+        return;
+    }
+
+    let html = `
+        <p>
+            <strong>Date:</strong>
+            ${sale.date}
+        </p>
+
+        <p>
+            <strong>Payment:</strong>
+            ${sale.paymentMethod}
+        </p>
+
+        <hr>
+    `;
+
+    sale.items.forEach(
+        item => {
+
+            html += `
+                <p>
+
+                    ${item.name}
+
+                    x
+
+                    ${item.quantity}
+
+                    =
+
+                    KES ${
+                        (
+                            item.price *
+                            item.quantity
+                        ).toLocaleString()
+                    }
+
+                </p>
+            `;
+
+        }
+    );
+
+    html += `
+        <hr>
+
+        <h3>
+            Total:
+            KES ${sale.total.toLocaleString()}
+        </h3>
+    `;
+
+    document.getElementById(
+        "saleDetailsContent"
+    ).innerHTML = html;
+
+    document.getElementById(
+        "saleDetailsModal"
+    ).style.display = "flex";
+}
+document.getElementById(
+    "closeDetailsBtn"
+).addEventListener(
+    "click",
+    function () {
+
+        document.getElementById(
+            "saleDetailsModal"
+        ).style.display =
+            "none";
+
+    }
+);
 
     </script>
 
