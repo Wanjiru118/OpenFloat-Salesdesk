@@ -49,7 +49,48 @@
                     </div>
 
                 </div>
+<div class="card recent-sales">
 
+    <h3>Recent Sales</h3>
+
+    <div id="recentSalesList">
+        No sales available.
+    </div>
+
+</div>
+
+<div class="card top-products">
+
+    <h3>Top Selling Products</h3>
+
+    <div id="topProductsList">
+        No sales data available.
+    </div>
+
+</div>
+<div class="card payment-breakdown">
+
+    <h3>Sales by Payment Method</h3>
+
+    <div id="paymentBreakdown">
+        No sales data available.
+    </div>
+
+</div>
+<div class="card">
+
+    <h3>Export Reports</h3>
+    <div class="report-actions"></div>
+
+    <button onclick="exportSalesReport()">
+        Export Sales Report
+    </button>
+
+    <button onclick="exportInventoryReport()">
+        Export Inventory Report
+    </button>
+
+</div>
             </div>
 
         </div>
@@ -78,59 +119,6 @@
             "Admin Dashboard"
         );
 
-        const products =
-        JSON.parse(
-            localStorage.getItem(
-                "products"
-            )
-        ) || [];
-
-        document.getElementById(
-            "totalProducts"
-        ).innerText =
-        products.length;
-
-        const inventoryValue =
-        products.reduce(
-            (sum, product) =>
-            sum +
-            (
-                Number(product.price || 0)
-                *
-                Number(product.stock || 0)
-            ),
-            0
-        );
-
-        document.getElementById(
-            "inventoryValue"
-        ).innerText =
-        "KES " +
-        inventoryValue.toLocaleString();
-
-        const lowStockProducts =
-        products.filter(
-            product =>
-            Number(product.stock || 0) < 10
-        );
-
-        document.getElementById(
-            "lowStock"
-        ).innerText =
-        lowStockProducts.length;
-
-        const categories =
-        new Set(
-            products.map(
-                product =>
-                product.category
-            )
-        );
-
-        document.getElementById(
-            "totalCategories"
-        ).innerText =
-        categories.size;
 const sales =
     JSON.parse(
         localStorage.getItem("sales")
@@ -183,6 +171,259 @@ document.getElementById(
     "KES " +
     averageSale.toFixed(0)
         .toLocaleString();
+
+        const recentSalesContainer =
+    document.getElementById(
+        "recentSalesList"
+    );
+
+if (sales.length > 0) {
+
+    const recentSales =
+        [...sales]
+        .reverse()
+        .slice(0, 5);
+
+    recentSalesContainer.innerHTML = "";
+
+    recentSales.forEach(
+        sale => {
+
+            recentSalesContainer.innerHTML += `
+                <div class="sale-row">
+
+                    <span>
+                       ${sale.date.split(",")[0]}
+                    </span>
+
+                    <span>
+                        ${sale.paymentMethod}
+                    </span>
+
+                    <strong>
+                        KES ${sale.total}
+                    </strong>
+
+                </div>
+            `;
+
+        }
+    );
+
+}
+const productSales = {};
+
+sales.forEach(sale => {
+
+    sale.items.forEach(item => {
+
+        if (!productSales[item.name]) {
+
+            productSales[item.name] = 0;
+
+        }
+
+        productSales[item.name] +=
+            item.quantity;
+
+    });
+
+});
+
+const sortedProducts =
+    Object.entries(productSales)
+    .sort(
+        (a, b) => b[1] - a[1]
+    )
+    .slice(0, 5);
+
+const topProductsList =
+    document.getElementById(
+        "topProductsList"
+    );
+
+if (sortedProducts.length > 0) {
+
+    topProductsList.innerHTML = "";
+
+    sortedProducts.forEach(
+        ([name, quantity], index) => {
+
+            topProductsList.innerHTML += `
+                <div class="sale-row">
+
+                    <span>
+                        ${index + 1}. ${name}
+                    </span>
+
+                    <strong>
+                        ${quantity} sold
+                    </strong>
+
+                </div>
+            `;
+
+        }
+    );
+
+}
+const paymentMethods = {
+
+    cash: 0,
+    mpesa: 0,
+    credit: 0
+
+};
+
+sales.forEach(sale => {
+
+    const method =
+        sale.paymentMethod
+            .toLowerCase();
+
+    if (
+        paymentMethods[
+            method
+        ] !== undefined
+    ) {
+
+        paymentMethods[
+            method
+        ]++;
+
+    }
+
+});
+
+const paymentBreakdown =
+    document.getElementById(
+        "paymentBreakdown"
+    );
+
+paymentBreakdown.innerHTML = `
+
+    <div class="sale-row">
+        <span>Cash</span>
+        <strong>
+            ${paymentMethods.cash}
+            sales
+        </strong>
+    </div>
+
+    <div class="sale-row">
+        <span>Mpesa</span>
+        <strong>
+            ${paymentMethods.mpesa}
+            sales
+        </strong>
+    </div>
+
+    <div class="sale-row">
+        <span>Credit</span>
+        <strong>
+            ${paymentMethods.credit}
+            sales
+        </strong>
+    </div>
+
+`;
+function exportSalesReport() {
+
+    const sales =
+        JSON.parse(
+            localStorage.getItem(
+                "sales"
+            )
+        ) || [];
+
+    let csv =
+        "Date,Payment Method,Total\n";
+
+    sales.forEach(sale => {
+
+        csv +=
+            `"${sale.date}",` +
+            `"${sale.paymentMethod}",` +
+            `"${sale.total}"\n`;
+
+    });
+
+    downloadCSV(
+        csv,
+        "sales-report.csv"
+    );
+
+}
+function exportInventoryReport() {
+
+    const products =
+        JSON.parse(
+            localStorage.getItem(
+                "products"
+            )
+        ) || [];
+
+    let csv =
+        "Name,Category,Price,Stock\n";
+
+    products.forEach(product => {
+
+        csv +=
+            `"${product.name}",` +
+            `"${product.category}",` +
+            `"${product.price}",` +
+            `"${product.stock}"\n`;
+
+    });
+
+    downloadCSV(
+        csv,
+        "inventory-report.csv"
+    );
+
+}
+function downloadCSV(
+    csv,
+    filename
+) {
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                    "text/csv"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+    link.href =
+        url;
+
+    link.download =
+        filename;
+
+    document.body.appendChild(
+        link
+    );
+
+    link.click();
+
+    document.body.removeChild(
+        link
+    );
+
+}
+
     </script>
 
 </body>

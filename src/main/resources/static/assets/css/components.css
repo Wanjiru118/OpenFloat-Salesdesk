@@ -339,3 +339,48 @@
     font-size:28px;
     font-weight:bold;
 }
+
+.recent-sales{
+    margin-top:40px;
+    
+}
+
+.sale-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid #eee;
+}
+
+.sale-row span,
+.sale-row strong{
+    flex:1;
+}
+
+.top-products{
+    margin-top:40px;
+}
+
+.payment-breakdown{
+    margin-top:40px;
+}
+
+.report-actions button{
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    background:var(--teal);
+    color:white;
+    transition:0.3s;
+    min-width:180px;
+    margin-right:15px;
+    gap: 30px;
+}
+
+.report-actions button:hover{
+    opacity:0.9;
+    transform:translateY(-2px);
+}

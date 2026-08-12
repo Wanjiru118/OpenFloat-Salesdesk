@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<title>Products</title>
+
+<link rel="stylesheet" href="../assets/css/variables.css">
+<link rel="stylesheet" href="../assets/css/layout.css">
+<link rel="stylesheet" href="../assets/css/components.css">
+
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+
+        <div id="topbar"></div>
+
+        <div class="content">
+
+            <h1>Product Management</h1>
+
+<br>
+
+<div class="toolbar">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search products..."
+    >
+
+    <button id="addProductBtn">
+        Add Product
+    </button>
+
+</div>
+
+<br>
+<div class="inventory-summary">
+
+    <div class="summary-card">
+        <h3>Total Products</h3>
+        <p id="totalProducts">0</p>
+    </div>
+
+    <div class="summary-card">
+        <h3>Low Stock</h3>
+        <p id="lowStockCount">0</p>
+    </div>
+
+    <div class="summary-card">
+        <h3>Out of Stock</h3>
+        <p id="outOfStockCount">0</p>
+    </div>
+
+</div>
+<table class="table">
+
+    <thead>
+
+        <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+
+    </thead>
+
+    <tbody id="productsTable">
+
+    </tbody>
+
+</table>
+
+        </div>
+
+    </div>
+
+</div>
+<div id="productModal"
+     class="modal">
+
+    <div class="modal-content">
+
+        <h2>Add Product</h2>
+
+        <br>
+
+        <input
+            type="text"
+            id="productName"
+            placeholder="Product Name"
+        >
+
+        <br><br>
+
+        <input
+            type="text"
+            id="productCategory"
+            placeholder="Category"
+        >
+
+        <br><br>
+
+        <input
+            type="number"
+            id="productPrice"
+            placeholder="Price"
+        >
+
+        <br><br>
+
+        <button id="saveProduct">
+            Save Product
+        </button>
+
+    </div>
+
+</div>
+<script src="../assets/js/guard.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script src="../assets/js/api.js"></script>
+
+<script>
+
+requireAuth("admin");
+let editIndex = null;
+document.getElementById(
+    "sidebar"
+).innerHTML =
+createSidebar(
+    "admin"
+);
+
+document.getElementById(
+    "topbar"
+).innerHTML =
+createTopbar(
+    "Products"
+);
+
+
+let products =
+JSON.parse(
+    localStorage.getItem("products")
+) || [
+    {
+        name:"Sugar",
+        category:"Groceries",
+        price:150,
+        stock:100
+    },
+    {
+        name:"Bread",
+        category:"Bakery",
+        price:65,
+        stock:40
+    },
+    {
+        name:"Milk",
+        category:"Dairy",
+        price:75,
+        stock:25
+    }
+];
+function saveProducts(){
+
+    localStorage.setItem(
+        "products",
+        JSON.stringify(products)
+    );
+}
+
+function renderProducts(){
+
+    const table =
+    document.getElementById(
+        "productsTable"
+    );
+
+    table.innerHTML = "";
+document.getElementById(
+    "totalProducts"
+).innerText = products.length;
+
+document.getElementById(
+    "lowStockCount"
+).innerText =
+    products.filter(
+        p =>
+            Number(p.stock) > 0 &&
+            Number(p.stock) <= 5
+    ).length;
+
+document.getElementById(
+    "outOfStockCount"
+).innerText =
+    products.filter(
+        p =>
+            Number(p.stock) === 0
+    ).length;
+
+    products.forEach((product,index) => {
+console.log(product.name, product.stock);
+        table.innerHTML += `
+            <tr>
+
+                <td>${product.name}</td>
+
+                <td>${product.category}</td>
+
+                <td>${product.price}</td>
+
+                <td>
+    ${product.stock}
+    ${
+        Number(product.stock) === 0
+            ? "❌ Out of Stock"
+            : Number(product.stock) <= 5
+            ? "⚠️ Low Stock"
+            : ""
+    }
+</td>
+
+<td>
+    <button onclick="editProduct(${index})">
+        Edit
+    </button>
+
+    <button onclick="deleteProduct(${index})">
+        Delete
+    </button>
+</td>
+
+            </tr>
+        `;
+    });
+
+}
+
+renderProducts();
+
+document.getElementById(
+    "searchInput"
+).addEventListener(
+    "keyup",
+    (e)=>{
+
+        const value =
+        e.target.value.toLowerCase();
+
+        const rows =
+        document.querySelectorAll(
+            "#productsTable tr"
+        );
+
+        rows.forEach(row=>{
+
+            row.style.display =
+            row.innerText
+            .toLowerCase()
+            .includes(value)
+            ? ""
+            : "none";
+
+        });
+
+    }
+);
+
+function deleteProduct(index){
+
+    const confirmDelete =
+    confirm(
+        "Delete this product?"
+    );
+
+    if(!confirmDelete){
+        return;
+    }
+
+    products.splice(index,1);
+saveProducts();
+    renderProducts();
+}
+
+function editProduct(index){
+
+    editIndex = index;
+
+    document.getElementById(
+        "productName"
+    ).value =
+    products[index].name;
+
+    document.getElementById(
+        "productCategory"
+    ).value =
+    products[index].category;
+
+    document.getElementById(
+        "productPrice"
+    ).value =
+    products[index].price;
+
+    modal.style.display =
+    "block";
+}
+const modal =
+document.getElementById(
+    "productModal"
+);
+
+document.getElementById(
+    "addProductBtn"
+).addEventListener(
+    "click",
+    ()=>{
+        modal.style.display =
+        "block";
+    }
+);
+document.getElementById(
+    "saveProduct"
+).addEventListener(
+    "click",
+    ()=>{
+
+        const product = {
+
+            name:
+            document.getElementById(
+                "productName"
+            ).value,
+
+            category:
+            document.getElementById(
+                "productCategory"
+            ).value,
+
+            price:
+            document.getElementById(
+                "productPrice"
+            ).value,
+
+            stock:0
+        };
+
+        if(editIndex !== null){
+
+            products[editIndex] =
+            product;
+
+            editIndex = null;
+
+        } else {
+
+            products.push(product);
+        }
+
+        saveProducts();
+
+        renderProducts();
+
+        modal.style.display =
+        "none";
+    }
+);
+      
+document.getElementById(
+    "addProductBtn"
+).addEventListener(
+    "click",
+    ()=>{
+        console.log("Button clicked");
+
+        modal.style.display =
+        "block";
+    }
+);
+</script>
+
+</body>
+</html>
