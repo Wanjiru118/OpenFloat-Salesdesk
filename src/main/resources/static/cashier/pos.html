@@ -77,11 +77,25 @@
         <h2>Checkout</h2>
 
         <p>
-            Total:
-            <strong id="checkoutTotal">
-                KES 0
-            </strong>
-        </p>
+    Subtotal:
+    <strong id="checkoutSubtotal">
+        KES 0
+    </strong>
+</p>
+
+<p>
+    Tax:
+    <strong id="checkoutTax">
+        KES 0
+    </strong>
+</p>
+
+<p>
+    Total:
+    <strong id="checkoutTotal">
+        KES 0
+    </strong>
+</p>
 
         <label>
             Payment Method
@@ -129,6 +143,7 @@
 
 </div>
 </div>
+
 <script src="../assets/js/guard.js"></script>
 <script src="../assets/js/layout.js"></script>
 
@@ -136,10 +151,25 @@
 
 requireAuth("cashier");
 
+const toastDiv = document.createElement("div");
+toastDiv.id = "toast";
+document.body.appendChild(toastDiv);
+const settings =
+    JSON.parse(
+        localStorage.getItem("settings")
+    ) || {};
+
+const currency =
+    settings.currency || "KES";
+
+const taxRate =
+    Number(settings.taxRate) || 0;
 document.getElementById("sidebar").innerHTML =
 createSidebar(
     "cashier", "pos"
 );
+console.log("Settings:", settings);
+console.log("Tax Rate:", taxRate);
 
 document.getElementById("topbar").innerHTML =
 createTopbar("Point of Sale");
@@ -380,9 +410,14 @@ function renderCart() {
         }
     );
 
-    cartTotal.innerText =
-        "KES " +
-        total.toLocaleString();
+   const taxAmount =
+    total * (taxRate / 100);
+
+const grandTotal =
+    total + taxAmount;
+
+cartTotal.innerText =
+    `${currency} ${grandTotal.toLocaleString()}`;
 }
 
 renderProducts();
@@ -402,23 +437,38 @@ document.getElementById(
             return;
         }
 
-        let total = 0;
+        let subtotal = 0;
 
         cart.forEach(
             item => {
 
-                total +=
+                subtotal +=
                     item.price *
                     item.quantity;
 
             }
         );
 
-        document.getElementById(
-            "checkoutTotal"
-        ).innerText =
-            "KES " +
-            total.toLocaleString();
+        const taxAmount =
+    subtotal * (taxRate / 100);
+
+const grandTotal =
+    subtotal + taxAmount;
+
+document.getElementById(
+    "checkoutSubtotal"
+).innerText =
+    `${currency} ${subtotal.toLocaleString()}`;
+
+    document.getElementById(
+    "checkoutTax"
+).innerText =
+    `${currency} ${taxAmount.toLocaleString()}`;
+
+document.getElementById(
+    "checkoutTotal"
+).innerText =
+    `${currency} ${grandTotal.toLocaleString()}`;
 
         document.getElementById(
             "checkoutModal"
@@ -733,9 +783,9 @@ console.log(localStorage.getItem("sales"));
     ).style.display =
         "none";
 
-    alert(
-        "Sale completed successfully."
-    );
+    showToast(
+    "Sale completed successfully."
+);
 
 }
 document.getElementById(
@@ -744,8 +794,31 @@ document.getElementById(
     "click",
     completeSale
 );
+function showToast(message){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+    toast.innerText =
+        message;
+
+    toast.classList.add(
+        "show"
+    );
+
+    setTimeout(() => {
+
+        toast.classList.remove(
+            "show"
+        );
+
+    }, 3000);
+
+}
 
 </script>
-
+<div id="toast"></div>
 </body>
 </html>

@@ -26,29 +26,109 @@
 
             <div class="content">
 
-                <div class="dashboard-cards">
+    <!-- Dashboard Section -->
+    <div id="dashboardSection">
 
-                    <div class="card">
-                        <h3>Total Sales</h3>
-                        <h1 id="totalSales">0</h1>
-                    </div>
+        <div class="dashboard-cards">
 
-                    <div class="card">
-                        <h3>Total Revenue</h3>
-                        <h1 id="totalRevenue">0</h1>
-                    </div>
+            <div class="card">
+                <h3>Total Sales</h3>
+                <h1 id="totalSales">0</h1>
+            </div>
 
-                    <div class="card">
-                        <h3>Products Sold</h3>
-                        <h1 id="productsSold">0</h1>
-                    </div>
+            <div class="card">
+                <h3>Total Revenue</h3>
+                <h1 id="totalRevenue">0</h1>
+            </div>
 
-                    <div class="card">
-                        <h3>Average Sale</h3>
-                        <h1 id="averageSale">0</h1>
-                    </div>
+            <div class="card">
+                <h3>Products Sold</h3>
+                <h1 id="productsSold">0</h1>
+            </div>
 
-                </div>
+            <div class="card">
+                <h3>Average Sale</h3>
+                <h1 id="averageSale">0</h1>
+            </div>
+
+        </div>
+
+        <!-- Keep your existing charts and other dashboard content here -->
+
+    </div>
+
+
+    <!-- Settings Section -->
+    <div id="settingsSection" style="display: none;">
+
+        <h2>System Settings</h2>
+
+        <div class="card">
+
+            <label for="businessName">
+                Business Name
+            </label>
+
+            <input
+                type="text"
+                id="businessName"
+                placeholder="Enter business name"
+            >
+
+
+            <label for="currency">
+                Currency
+            </label>
+
+            <select id="currency">
+                <option value="KES">KES - Kenyan Shilling</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+            </select>
+
+
+            <label for="taxRate">
+                Tax Rate (%)
+            </label>
+
+            <input
+                type="number"
+                id="taxRate"
+                placeholder="Enter tax rate"
+                min="0"
+                step="0.01"
+            >
+
+
+            <button id="saveSettings">
+                Save Settings
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+                <div class="chart-grid">
+
+    <div class="card">
+
+        <h3>Sales by Payment Method</h3>
+
+        <canvas id="paymentChart"></canvas>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Top Selling Products</h3>
+
+        <canvas id="productsChart"></canvas>
+
+    </div>
+
+</div>
 <div class="card recent-sales">
 
     <h3>Recent Sales</h3>
@@ -99,8 +179,21 @@
 
     <script src="../assets/js/guard.js"></script>
     <script src="../assets/js/layout.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
+const savedSettings =
+    JSON.parse(
+        localStorage.getItem("settings")
+    ) || {};
+
+const businessName =
+    savedSettings.businessName ||
+    "SalesDesk";
+
+const currency =
+    savedSettings.currency ||
+    "KES";
 
         requireAuth("admin");
 
@@ -112,12 +205,14 @@
             "dashboard"
         );
 
-        document.getElementById(
-            "topbar"
-        ).innerHTML =
-        createTopbar(
-            "Admin Dashboard"
-        );
+     
+
+document.getElementById(
+    "topbar"
+).innerHTML =
+createTopbar(
+    businessName + " Dashboard"
+);
 
 const sales =
     JSON.parse(
@@ -157,7 +252,7 @@ document.getElementById(
 document.getElementById(
     "totalRevenue"
 ).innerText =
-    "KES " +
+    currency + " " +
     totalRevenue.toLocaleString();
 
 document.getElementById(
@@ -168,9 +263,8 @@ document.getElementById(
 document.getElementById(
     "averageSale"
 ).innerText =
-    "KES " +
-    averageSale.toFixed(0)
-        .toLocaleString();
+    currency + " " +
+    averageSale.toFixed(0);
 
         const recentSalesContainer =
     document.getElementById(
@@ -211,62 +305,8 @@ if (sales.length > 0) {
     );
 
 }
-const productSales = {};
 
-sales.forEach(sale => {
 
-    sale.items.forEach(item => {
-
-        if (!productSales[item.name]) {
-
-            productSales[item.name] = 0;
-
-        }
-
-        productSales[item.name] +=
-            item.quantity;
-
-    });
-
-});
-
-const sortedProducts =
-    Object.entries(productSales)
-    .sort(
-        (a, b) => b[1] - a[1]
-    )
-    .slice(0, 5);
-
-const topProductsList =
-    document.getElementById(
-        "topProductsList"
-    );
-
-if (sortedProducts.length > 0) {
-
-    topProductsList.innerHTML = "";
-
-    sortedProducts.forEach(
-        ([name, quantity], index) => {
-
-            topProductsList.innerHTML += `
-                <div class="sale-row">
-
-                    <span>
-                        ${index + 1}. ${name}
-                    </span>
-
-                    <strong>
-                        ${quantity} sold
-                    </strong>
-
-                </div>
-            `;
-
-        }
-    );
-
-}
 const paymentMethods = {
 
     cash: 0,
@@ -327,6 +367,120 @@ paymentBreakdown.innerHTML = `
     </div>
 
 `;
+new Chart(
+    document.getElementById(
+        "paymentChart"
+    ),
+    {
+        type:"doughnut",
+
+        data:{
+            labels:[
+                "Cash",
+                "Mpesa",
+                "Credit"
+            ],
+
+            datasets:[
+                {
+                    data:[
+                        paymentMethods.cash,
+                        paymentMethods.mpesa,
+                        paymentMethods.credit
+                    ]
+                }
+            ]
+        }
+    }
+);
+const productSales = {};
+
+sales.forEach(sale => {
+
+    sale.items.forEach(item => {
+
+        if(
+            !productSales[
+                item.name
+            ]
+        ){
+            productSales[
+                item.name
+            ] = 0;
+        }
+
+        productSales[
+            item.name
+        ] += item.quantity;
+
+    });
+
+});
+
+const sortedProducts =
+    Object.entries(productSales)
+    .sort(
+        (a, b) => b[1] - a[1]
+    )
+    .slice(0, 5);
+
+const topProductsList =
+    document.getElementById(
+        "topProductsList"
+    );
+
+if (sortedProducts.length > 0) {
+
+    topProductsList.innerHTML = "";
+
+    sortedProducts.forEach(
+        ([name, quantity], index) => {
+
+            topProductsList.innerHTML += `
+                <div class="sale-row">
+
+                    <span>
+                        ${index + 1}. ${name}
+                    </span>
+
+                    <strong>
+                        ${quantity} sold
+                    </strong>
+
+                </div>
+            `;
+
+        }
+    );
+
+}
+new Chart(
+    document.getElementById(
+        "productsChart"
+    ),
+    {
+        type:"bar",
+
+        data:{
+            labels:
+                Object.keys(
+                    productSales
+                ),
+
+            datasets:[
+                {
+                    label:
+                        "Units Sold",
+
+                    data:
+                        Object.values(
+                            productSales
+                        )
+                }
+            ]
+        }
+    }
+);
 function exportSalesReport() {
 
     const sales =
@@ -423,7 +577,90 @@ function downloadCSV(
     );
 
 }
+const params = new URLSearchParams(window.location.search);
+const section = params.get("section");
 
+const dashboardSection = document.getElementById("dashboardSection");
+const settingsSection = document.getElementById("settingsSection");
+
+if (section === "settings") {
+
+    dashboardSection.style.display = "none";
+    settingsSection.style.display = "block";
+
+}
+
+// ===============================
+// SYSTEM SETTINGS
+// ===============================
+
+const businessNameInput =
+    document.getElementById("businessName");
+
+const currencyInput =
+    document.getElementById("currency");
+
+const taxRateInput =
+    document.getElementById("taxRate");
+
+const saveSettingsButton =
+    document.getElementById("saveSettings");
+
+
+// Load saved settings
+
+
+// Put saved values into the form
+if (businessNameInput) {
+    businessNameInput.value =
+        savedSettings.businessName || "";
+}
+
+if (currencyInput) {
+    currencyInput.value =
+        savedSettings.currency || "KES";
+}
+
+if (taxRateInput) {
+    taxRateInput.value =
+        savedSettings.taxRate || 0;
+}
+
+// Save settings
+if (saveSettingsButton) {
+
+    saveSettingsButton.addEventListener(
+        "click",
+        function () {
+
+            const settings = {
+
+                businessName:
+                    businessNameInput.value.trim(),
+
+                currency:
+                    currencyInput.value,
+
+                taxRate:
+                    Number(taxRateInput.value) || 0
+
+            };
+
+
+            localStorage.setItem(
+                "settings",
+                JSON.stringify(settings)
+            );
+
+
+            alert(
+                "Settings saved successfully!"
+            );
+
+        }
+    );
+
+}
     </script>
 
 </body>
