@@ -121,3 +121,31 @@ window.location.href =
 
 
 }
+function addActivityLog(action, details){
+
+    const logs =
+        JSON.parse(
+            localStorage.getItem(
+                "activityLogs"
+            )
+        ) || [];
+
+    logs.push({
+
+        date:
+            new Date().toLocaleString(),
+
+        action:
+            action,
+
+        details:
+            details
+
+    });
+
+    localStorage.setItem(
+        "activityLogs",
+        JSON.stringify(logs)
+    );
+
+}

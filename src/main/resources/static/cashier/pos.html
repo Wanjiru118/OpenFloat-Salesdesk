@@ -768,10 +768,17 @@ localStorage.setItem(
             sales
         )
     );
+    addActivityLog(
+    "Sale Completed",
+    "Sale of KES " + total
+);
     console.log("SALE SAVED");
 console.log(localStorage.getItem("sales"));
 
- 
+ addActivityLog(
+    "Sale Completed",
+    "Sale of KES " + total
+);
     cart = [];
 
     renderCart();
@@ -786,6 +793,7 @@ console.log(localStorage.getItem("sales"));
     showToast(
     "Sale completed successfully."
 );
+
 
 }
 document.getElementById(
