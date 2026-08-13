@@ -4,6 +4,7 @@
 <head>
     <title>Activity Logs</title>
 
+    <link rel="stylesheet" href="../assets/css/variables.css">
     <link rel="stylesheet" href="../assets/css/layout.css">
     <link rel="stylesheet" href="../assets/css/components.css">
 </head>
@@ -118,7 +119,9 @@ function loadActivityLogs(){
     });
 
 }
-
+console.log("Activity page loaded");
+console.log(localStorage.getItem("activityLogs"));
+console.log(document.getElementById("activityTable"));
 loadActivityLogs();
 
 

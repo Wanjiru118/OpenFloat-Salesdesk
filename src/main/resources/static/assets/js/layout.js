@@ -24,6 +24,12 @@ function createSidebar(role = "admin", active = "") {
                     Reports
                 </a>
             </li>
+            <li>
+    <a class="${active === 'activity' ? 'active' : ''}"
+       href="../admin/activity.html">
+       Activity Logs
+    </a>
+</li>
 
             <li>
                 <a class="${active === 'settings' ? 'active' : ''}"
