@@ -100,7 +100,17 @@
         <label>
             Payment Method
         </label>
+<label>
+    Customer
+</label>
 
+<select id="saleCustomer">
+
+    <option value="">
+        Walk-in Customer
+    </option>
+
+</select>
         <select id="paymentMethod">
 
             <option value="cash">
@@ -188,6 +198,31 @@ let sales =
         )
     ) || [];
 
+function loadCustomers(){
+
+    const customers =
+        JSON.parse(
+            localStorage.getItem(
+                "customers"
+            )
+        ) || [];
+
+    const select =
+        document.getElementById(
+            "saleCustomer"
+        );
+
+    customers.forEach(customer => {
+
+        select.innerHTML += `
+            <option value="${customer.name}">
+                ${customer.name}
+            </option>
+        `;
+
+    });
+
+}
 function renderProducts(){
 
     const productList =
@@ -272,8 +307,8 @@ function addToCart(index) {
             quantity: 1
         });
     }
-
     renderCart();
+}
     function increaseQuantity(index) {
 
     const item = cart[index];
@@ -318,7 +353,10 @@ function removeFromCart(index) {
 
     renderCart();
 }
-}
+window.increaseQuantity = increaseQuantity;
+window.decreaseQuantity = decreaseQuantity;
+window.removeFromCart = removeFromCart;
+
 function renderCart() {
 
     const cartItems =
@@ -740,23 +778,30 @@ localStorage.setItem(
     JSON.stringify(products)
 );
 //CREATE SALE
+    
+
     const sale = {
 
-        id:
-            Date.now(),
+    id:
+        Date.now(),
 
-        date:
-            new Date()
-            .toLocaleString(),
+    date:
+        new Date()
+        .toLocaleString(),
 
-        paymentMethod,
+    customer:
+        document.getElementById(
+            "saleCustomer"
+        ).value,
 
-        total,
+    paymentMethod,
 
-        items:
-            [...cart]
+    total,
 
-    };
+    items:
+        [...cart]
+
+};
 
     sales.push(
         sale
@@ -775,15 +820,13 @@ localStorage.setItem(
     console.log("SALE SAVED");
 console.log(localStorage.getItem("sales"));
 
- addActivityLog(
-    "Sale Completed",
-    "Sale of KES " + total
-);
     cart = [];
 
     renderCart();
 
     renderProducts();
+
+    loadCustomers();
 
     document.getElementById(
         "checkoutModal"

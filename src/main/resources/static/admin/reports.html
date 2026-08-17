@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reports</title>
+
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/layout.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+
+        <div id="topbar"></div>
+
+        <div class="content">
+
+            <h1>Reports</h1>
+
+            <div class="dashboard-cards">
+
+                <div class="card">
+                    <h3>Total Sales</h3>
+                    <h1 id="reportSales">0</h1>
+                </div>
+
+                <div class="card">
+                    <h3>Total Revenue</h3>
+                    <h1 id="reportRevenue">KES 0</h1>
+                </div>
+
+                <div class="card">
+                    <h3>Products Sold</h3>
+                    <h1 id="reportProductsSold">0</h1>
+                </div>
+
+                <div class="card">
+                    <h3>Average Sale</h3>
+                    <h1 id="reportAverageSale">KES 0</h1>
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h2>Export Reports</h2>
+
+                <div class="report-actions">
+
+                    <button id="exportSalesBtn">
+                        Export Sales CSV
+                    </button>
+
+                    <button id="exportInventoryBtn">
+                        Export Inventory CSV
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="../assets/js/guard.js"></script>
+<script src="../assets/js/layout.js"></script>
+
+<script>
+
+requireAuth("admin");
+
+document.getElementById("sidebar").innerHTML =
+    createSidebar(
+        "admin",
+        "reports"
+    );
+
+document.getElementById("topbar").innerHTML =
+    createTopbar(
+        "Reports"
+    );
+
+const sales =
+    JSON.parse(
+        localStorage.getItem("sales")
+    ) || [];
+
+let totalRevenue = 0;
+let productsSold = 0;
+
+sales.forEach(sale => {
+
+    totalRevenue += sale.total;
+
+    sale.items.forEach(item => {
+
+        productsSold += item.quantity;
+
+    });
+
+});
+
+const averageSale =
+    sales.length > 0
+        ? totalRevenue / sales.length
+        : 0;
+
+document.getElementById(
+    "reportSales"
+).innerText =
+    sales.length;
+
+document.getElementById(
+    "reportRevenue"
+).innerText =
+    "KES " +
+    totalRevenue.toLocaleString();
+
+document.getElementById(
+    "reportProductsSold"
+).innerText =
+    productsSold;
+
+document.getElementById(
+    "reportAverageSale"
+).innerText =
+    "KES " +
+    averageSale.toFixed(0);
+
+// Export Sales CSV
+
+document.getElementById(
+    "exportSalesBtn"
+).addEventListener(
+    "click",
+    () => {
+
+        const sales =
+            JSON.parse(
+                localStorage.getItem(
+                    "sales"
+                )
+            ) || [];
+
+        let csv =
+            "Date,Payment Method,Total\n";
+
+        sales.forEach(sale => {
+
+            csv +=
+                `"${sale.date}","${sale.paymentMethod}",${sale.total}\n`;
+
+        });
+
+        const blob =
+            new Blob(
+                [csv],
+                { type: "text/csv" }
+            );
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        link.href =
+            URL.createObjectURL(
+                blob
+            );
+
+        link.download =
+            "sales_report.csv";
+
+        link.click();
+
+    }
+);
+
+
+// Export Inventory CSV
+
+document.getElementById(
+    "exportInventoryBtn"
+).addEventListener(
+    "click",
+    () => {
+
+        const products =
+            JSON.parse(
+                localStorage.getItem(
+                    "products"
+                )
+            ) || [];
+
+        let csv =
+            "Name,Category,Price,Stock\n";
+
+        products.forEach(product => {
+
+            csv +=
+                `"${product.name}","${product.category}",${product.price},${product.stock}\n`;
+
+        });
+
+        const blob =
+            new Blob(
+                [csv],
+                { type: "text/csv" }
+            );
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+        link.href =
+            URL.createObjectURL(
+                blob
+            );
+
+        link.download =
+            "inventory_report.csv";
+
+        link.click();
+
+    }
+);
+</script>
+
+</body>
+</html>

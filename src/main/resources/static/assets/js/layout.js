@@ -19,11 +19,12 @@ function createSidebar(role = "admin", active = "") {
                 </a>
             </li>
 
-            <li>
-                <a href="#">
-                    Reports
-                </a>
-            </li>
+           <li>
+    <a class="${active === 'reports' ? 'active' : ''}"
+       href="../admin/reports.html">
+       Reports
+    </a>
+</li>
             <li>
     <a class="${active === 'activity' ? 'active' : ''}"
        href="../admin/activity.html">
@@ -63,11 +64,10 @@ function createSidebar(role = "admin", active = "") {
                 </a>
             </li>
 
-            <li>
-                <a href="#">
-                    Customers
-                </a>
-            </li>
+           <a class="${active === 'customers' ? 'active' : ''}"
+   href="../cashier/customers.html">
+   Customers
+</a>
         `;
     }
 

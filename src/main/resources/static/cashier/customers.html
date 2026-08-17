@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Customers</title>
+
+    <link rel="stylesheet" href="../assets/css/variables.css">
+    <link rel="stylesheet" href="../assets/css/layout.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div id="sidebar"></div>
+
+    <div class="main-content">
+
+        <div id="topbar"></div>
+
+        <div class="content">
+
+            <h1>Customers</h1>
+            <input
+    type="text"
+    id="customerSearch"
+    placeholder="Search by name or phone">
+
+
+            <button id="addCustomerBtn">
+                Add Customer
+            </button>
+
+            <div class="card">
+
+                <table class="table">
+
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Total Purchases</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="customerTable">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<div id="customerModal" class="modal">
+
+    <div class="modal-content">
+
+        <h2>Add Customer</h2>
+
+        <input
+            type="text"
+            id="customerName"
+            placeholder="Customer Name">
+
+        <input
+            type="text"
+            id="customerPhone"
+            placeholder="Phone Number">
+
+        <input
+            type="email"
+            id="customerEmail"
+            placeholder="Email (Optional)">
+
+        <button id="saveCustomer">
+            Save Customer
+        </button>
+
+    </div>
+
+</div>
+<script src="../assets/js/guard.js"></script>
+<script src="../assets/js/layout.js"></script>
+
+<script>
+
+requireAuth("cashier");
+
+document.getElementById("sidebar").innerHTML =
+    createSidebar(
+        "cashier",
+        "customers"
+    );
+
+document.getElementById("topbar").innerHTML =
+    createTopbar(
+        "Customers"
+    );
+
+function renderCustomers(){
+
+  const customers =
+    JSON.parse(
+        localStorage.getItem(
+            "customers"
+        )
+    ) || [];
+
+const search =
+    document.getElementById(
+        "customerSearch"
+    ).value.toLowerCase();
+
+const filteredCustomers =
+    customers.filter(customer =>
+
+        customer.name
+            .toLowerCase()
+            .includes(search)
+
+        ||
+
+       String(customer.phone)
+    .includes(search)
+
+    );
+
+    const table =
+        document.getElementById(
+            "customerTable"
+        );
+
+    table.innerHTML = "";
+
+   filteredCustomers.forEach(customer => {
+
+        table.innerHTML += `
+            <tr>
+<td>
+
+    <a href="#"
+       onclick="viewCustomerHistory('${customer.name}')">
+
+       ${customer.name}
+
+    </a>
+
+</td>
+
+                <td>${customer.phone}</td>
+
+                <td>
+                    KES ${customer.totalPurchases}
+                </td>
+
+            </tr>
+        `;
+
+    });
+
+}
+
+renderCustomers();
+
+function viewCustomerHistory(customerName){
+
+    const sales =
+        JSON.parse(
+            localStorage.getItem(
+                "sales"
+            )
+        ) || [];
+
+    const customerSales =
+        sales.filter(
+            sale =>
+            sale.customer ===
+            customerName
+        );
+
+    let totalSpent = 0;
+
+    let message =
+        customerName +
+        "\n\nPurchases\n----------------\n";
+
+    customerSales.forEach(sale => {
+
+        totalSpent +=
+            sale.total;
+
+        message +=
+            sale.date +
+            " - KES " +
+            sale.total +
+            "\n";
+
+    });
+
+    message +=
+        "\nTotal Spent: KES " +
+        totalSpent;
+
+    alert(message);
+
+}
+document.getElementById(
+    "customerSearch"
+).addEventListener(
+    "input",
+    renderCustomers
+);
+const customerModal =
+    document.getElementById(
+        "customerModal"
+    );
+
+document.getElementById(
+    "addCustomerBtn"
+).addEventListener(
+    "click",
+    () => {
+
+        customerModal.style.display =
+            "flex";
+
+    }
+);
+document.getElementById(
+    "saveCustomer"
+).addEventListener(
+    "click",
+    () => {
+
+        const customers =
+            JSON.parse(
+                localStorage.getItem(
+                    "customers"
+                )
+            ) || [];
+
+        customers.push({
+
+            name:
+                document.getElementById(
+                    "customerName"
+                ).value,
+
+            phone:
+                document.getElementById(
+                    "customerPhone"
+                ).value,
+
+            email:
+                document.getElementById(
+                    "customerEmail"
+                ).value,
+
+            totalPurchases:0,
+
+            points:0
+
+        });
+
+        localStorage.setItem(
+            "customers",
+            JSON.stringify(customers)
+        );
+
+        customerModal.style.display =
+            "none";
+document.getElementById(
+    "customerName"
+).value = "";
+
+document.getElementById(
+    "customerPhone"
+).value = "";
+
+document.getElementById(
+    "customerEmail"
+).value = "";
+        renderCustomers();
+       
+
+    }
+);
+</script>
+
+</body>
+</html>
